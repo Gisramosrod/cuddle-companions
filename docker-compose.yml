@@ -1,0 +1,44 @@
+version: '3.4'
+
+services:
+  cuddlecompanions-api:
+    image: ${DOCKER_REGISTRY-}cuddlecompanions-api
+    container_name: CuddleCompanions.Api
+    build:
+      context: .
+      dockerfile: CuddleCompanions.Api/Dockerfile
+
+
+  cuddlecompanions-mailing-api:
+    image: ${DOCKER_REGISTRY-}cuddlecompanions-mailing-api
+    container_name: CuddleCompanions.Mailing.Api
+    build:
+      context: .
+      dockerfile: CuddleCompanions.Mailing.Api/Dockerfile
+
+
+  cuddlecompanions-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: CuddleCompanions.Db
+    volumes:
+        - ./.containers/database:/var/opt/mssql/data
+    ports:
+        - "1433:1433"
+    environment:
+        ACCEPT_EULA: "Y"
+        SA_PASSWORD: "Strong_password_123!"
+
+
+  cuddlecompanions-mq:
+    image: rabbitmq:management-alpine
+    container_name: CuddleCompanions.RabbitMq
+    hostname: cuddlecompanions-mq
+    volumes:
+        - ./.containers/queue/data/:/var/lib/rabbitmq
+        - ./.containers/queue/log/:/var/log/rabbitmq
+    environment:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+    ports:
+        - 5672:5672
+        - 15672:15672
